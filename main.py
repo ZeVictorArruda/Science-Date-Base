@@ -1,7 +1,7 @@
 from urllib.request import urlopen, urlretrieve, Request
 from urllib.error import URLError, HTTPError
 from bs4 import BeautifulSoup
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 import pandas as pd
 
 url = "https://www.fundamentus.com.br/fii_imoveis.php"
