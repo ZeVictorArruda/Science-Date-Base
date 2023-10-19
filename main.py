@@ -1,55 +1,56 @@
-from urllib.request import urlopen, urlretrieve, Request
-from urllib.error import URLError, HTTPError
-from bs4 import BeautifulSoup
 import matplotlib.pyplot as plt
 import pandas as pd
 
-url = "https://www.fundamentus.com.br/fii_imoveis.php"
-headers ={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.61 Safari/537.36"}
+dataset = pd.read_csv('acidentes2022.csv', sep=';')
 
-req = Request(url, headers=headers)
-response = urlopen(req)
-html = response.read()
-soup = BeautifulSoup(html, 'html.parser')
+y = dataset.iloc[:, 3].values
 
-lista = soup.find('table')
+acidentes = []
 
-if (lista == None):
-    print ('Lista som daddos')
-else:
-    print('Com dados') 
+try: 
+    for converse in y:
+        numero = int(converse)
+        acidentes.append(numero)
+        
+except ValueError:
+    print("A conversão não é possível, a string não representa um número inteiro válido.")
 
-qtd = soup.findAll('tr', class_='row')
-qtd = range(int(len(qtd)-1))
+semVitimas = 0
+comVitimas = 0
+fatalVitimas = 0
 
-resumo = []
+for numero in acidentes:
+    if (numero == 1):
+        comVitimas += 1
+    if (numero == 2):
+        semVitimas += 1      
+    if(numero == 3):
+        fatalVitimas += 1                
+        
+print("Acidentes sem vitimas:", semVitimas)
+print("Acidentes com vitimas:", comVitimas)
+print("Acidentes com vitimas Fatal:", fatalVitimas)
 
-papel =  lista.find('td').getText()
-pesquisa = lista.find('td').findNext('td').contents[0]
- 
-for i in qtd:
-    
-    acoes = {}
-    
-    FII = pesquisa.findNext('td').contents[0]
-    IMOVEL = FII.findNext('td').contents[0] 
-    ENDERECO = IMOVEL.findNext('td').contents[0] 
-    CARAC = ENDERECO.findNext('td').contents[0]  
-    
-    acoes['ID'] = papel
-    acoes['FII'] = FII
-    acoes['Imovel']= IMOVEL
-    acoes['Enrereço'] = ENDERECO
-    acoes['Caracteristicas'] = CARAC
-    
-    resumo.append(acoes)
-    
-    try:
-        papel = CARAC.findNext('td').span.a.contents[0]
-        pesquisa = papel.findPrevious('td').findNext('td').contents[0]
-    except HTTPError as e:
-        print(e.status, e.reason)   
-         
-dataset = pd.DataFrame(resumo)
-dataset.head(10000)
-print(dataset)    
+acTotal = semVitimas + comVitimas + fatalVitimas
+
+#Muda a cor das barras pela ordem
+cores = ['green','blue','red','black']
+
+#Array com os numeros de acidentes
+arrayAcidentes = [semVitimas,comVitimas,fatalVitimas, acTotal]
+strings = [
+    'Sem Vitimas - '+str(semVitimas),
+    'Com Vitimas - '+str(comVitimas),
+    'Fatal Vitimas - '+str(fatalVitimas),
+    'Total de Vitimas - '+str(acTotal)
+    ]
+
+#Criação da tabela estilo barras 
+plt.bar(range(len(arrayAcidentes)), arrayAcidentes, color=cores)
+plt.title("Acidentes 2022")
+plt.ylabel("Números de acidentes")
+plt.xticks(range(len(arrayAcidentes)), strings)
+
+# Exiba o gráfico
+plt.show()
+        
